@@ -32,7 +32,7 @@ The full list of dependencies can be found in the ```package.xml``` file.
 To install the simulator package, clone the repo with the simulator and starter code into your catkin workspace:
 
     cd ~/catkin_ws/src
-    git clone https://github.com/chenyx512/tianracer.git
+    git clone https://github.com/chenyx512/f1tenth_simulator.git
     
 Then run ```catkin_make``` to build it:
 
