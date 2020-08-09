@@ -35,7 +35,7 @@ def callback(data):
     else:
         speed = 0
     steering_angle = 0 # radian in range [-0.4189, 0.4189]
-    drive_msg = AckermannDrive(steering_angle=0, speed=speed)
+    drive_msg = AckermannDrive(steering_angle=steering_angle, speed=speed)
     drive_st_msg = AckermannDriveStamped(drive=drive_msg)
     drive_pub.publish(drive_st_msg)
 
