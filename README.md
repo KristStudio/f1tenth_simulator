@@ -7,7 +7,7 @@ modified for TechX 2020, originally at https://github.com/tianbot/tianracer
 2. Try to modify node/auto_drive.py to make the car go around without crashing. You may reference
 these websites
 - Simple Wall Following: https://drive.google.com/file/d/1tzyfGYq3JjvLlYHIiSTyvoNq4kcPf53n/view.
-A simple P controller will suffice. That is,`output = K * error`, where K is a constant
+A simple P controller will suffice. That is,`output = P * error`, where P is a constant
 - For advanced students, Disparity Extender: https://www.nathanotterness.com/2019/04/the-disparity-extender-algorithm-and.html 
 - For more advanced students, mixed wall-following and disparity extender: https://medium.com/@chardorn/running-an-f1tenth-car-like-a-real-racecar-f5da160d8573 
 
@@ -57,3 +57,11 @@ Note: when crushed, you may need to press p or k again to reenter keyboard/auto 
 ### RVIZ Visualization
 
 You can use keyboard joystick to drive the car around, or you can place the car manually by clicking the "2D Pose Estimate button" on the top of the screen and dragging your mouse on the desired pose.
+
+### Change of Maps
+
+Under directory f1tenth_simulator/maps you can see some different maps. The default is `levine_blocked` but you can change it after trying on the first map. To change map, modify line 7 of `launch/simulator.launch`, for example change that line to  
+
+`  <arg name="map" default="$(find f1tenth_simulator)/maps/ columbia.yaml"/>`
+ 
+will change the map to `columbia`
