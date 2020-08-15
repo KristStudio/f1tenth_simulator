@@ -13,10 +13,10 @@ distance_set = []
 current_gear = 0 #Notrunning
 simulator_mode = False
 
-wf_pid_controller = universal_pid(0.2, 0.4, 0.0, 0.4)
+wf_pid_controller = universal_pid(0.2, 0.3, 0.0, 0.4)
 # speed_pid_controller = universal_pid(0.2)
 
-def get_range(data, angle, deg=True):[]
+def get_range(data, angle, deg=True):
     """
     this method outputs the distance to a certain angle
 
@@ -87,15 +87,12 @@ def perception(data):
     swerve_percep = swerve_perception(data)
     lnf_percep = long_narrow_front_perception()
     swf_percep = short_wide_front_perception()
-    wf_percep = wall_following_perception(distance_apart = 0.4,data = data)
+    wf_percep = wall_following_perception(distance_apart = 0.8,data = data)
     bilateral_percep = bilateral_perception()
 
     # add all the changes of steering angle from the perception done above
     # steering_angle = swerve_percep[1] + swf_percep[1] + lnf_percep[1]
-    if swf_percep[0] and min(distance_set[75:105]) < 0.5:
-        steering_angle = swf_percep[1] + lnf_percep[1]
-    else:
-        steering_angle = swerve_percep[1] + swf_percep[1] + lnf_percep[1]
+    steering_angle = swerve_percep[1] + swf_percep[1] + lnf_percep[1]
     
     # when the specific perception is working, the gear will be shifted automatically 
     #   e.g.: when the car is swerving, the gear will be shifted down for a slower speed
@@ -109,7 +106,7 @@ def perception(data):
             isfullspeed = False
             shift_gear(4) if simulator_mode == True else shift_gear(1)
         if isfullspeed == True:
-            shift_gear(4) if simulator_mode == True else shift_gear(3)
+            shift_gear(4) if simulator_mode == True else shift_gear(1)
     else:
         steering_angle += 0
 
@@ -126,26 +123,18 @@ def swerve_perception(data):
     global distance_set
     alldistance_set = [get_range(data, i) for i in range(180, -181, -1)]
 
-    #if min(distance_set[60:120]) < 2.0:
-    #    pass
-    if min(distance_set[75:105]) < 1.5:
-        #if max(alldistance_set[60:120]) < max(alldistance_set[240:300]):
-        if Sum(alldistance_set[60:120]) < Sum(alldistance_set[240:300]):
-            return (True,-0.6)
-        else:
-            return (True,0.6)
-
+    if min(distance_set[80:100]) < 2.0:
+        if min(distance_set[80:100]) < 0.75:
+            if max(alldistance_set[60:120]) < max(alldistance_set[210:270]):
+                return (True,-0.6)
+            else:
+                return (True,0.6) 
+        return (True, 0.0)
     return (False,0.0)
-
-def Sum(_list):
-    _sum = 0
-    for i in _list:
-        _sum += i
-    return _sum
 
 def wall_following_perception(distance_apart,data):
     global wf_pid_controller
-    error = - get_wf_error(distance_apart,data)
+    error = get_wf_error(distance_apart,data)
     steering_angle = wf_pid_controller.get_value(error)
 
     return (True,steering_angle)
@@ -163,7 +152,7 @@ def get_wf_error(distance_apart,data):
 
     # naming convention according to above pdf
     b = distance_set[180]
-    a = get_range(data, 90 - THETA)
+    a = get_range(data, - 90 + THETA)
 
     # print(f"a{a:1.1f} b{b:1.1f}")
     alpha = np.arctan((a * np.cos(THETA) - b) / (a * np.sin(THETA)))
@@ -177,14 +166,14 @@ def long_narrow_front_perception():
     global distance_set
     steering_angle = 0.0
     #max(distance_set[84:97])
-    for i in range(25):
+    for i in range(15):
         if distance_set[89 - i] < distance_set[91 + i]:
-            if 1.8 < distance_set[89 - i] < 2.0:
-                steering_angle = -0.25
+            if 2.0 < distance_set[89 - i] < 10.0:
+                steering_angle = -0.15
                 break
         else:
-            if 1.8 < distance_set[91 + i] < 2.0:
-                steering_angle = 0.25
+            if 2.0 < distance_set[91 + i] < 10.0:
+                steering_angle = 0.15
                 break
     else:
         return (False,0.0)
@@ -196,14 +185,22 @@ def long_narrow_front_perception():
 def short_wide_front_perception():
     global distance_set
     steering_angle = 0.0
-    for i in range(55):
+    for i in range(30):
         if distance_set[89 - i] < distance_set[91 + i]:
-            if distance_set[90 - i] < 0.45:
-                steering_angle = -0.35
+            if distance_set[90 - i] < 0.5:
+                steering_angle = -0.4
+                break
+            if distance_set[89 - i] < 1.6:
+                #set_speedmode(2)
+                steering_angle = -0.20
                 break
         else:
-            if distance_set[91 + i] < 0.45:
-                steering_angle = 0.35
+            if distance_set[91 + i] < 0.5:
+                steering_angle = 0.4
+                break
+            if distance_set[91 + i] < 1.6:
+                #set_speedmode(2)
+                steering_angle = 0.20
                 break
     else:
         return (False,0.0)
